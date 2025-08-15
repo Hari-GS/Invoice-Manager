@@ -1,23 +1,35 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import Upload from "./pages/Upload";
+import PaidInvoice from "./pages/PaidInvoice";
+import Account from "./pages/Account";
+import Login from "./components/Login";
+import Signup from "./components/SignUp";
+import ProtectedRoute from "./auth/ProductedRoute";
 
-const Home = () => <h1>Home Page</h1>;
-const Upload = () => <h1>Upload Page</h1>;
-const PaidInvoices = () => <h1>Paid Invoices Page</h1>;
-const Account = () => <h1>Account Page</h1>;
-
-const App = () => {
+export default function App() {
   return (
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="upload" element={<Upload />} />
-          <Route path="paid-invoices" element={<PaidInvoices />} />
-          <Route path="account" element={<Account />} />
-        </Route>
-      </Routes>
-  );
-};
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
 
-export default App;
+      {/* Protected Routes */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Home />} />
+        <Route path="upload" element={<Upload />} />
+        <Route path="paid-invoices" element={<PaidInvoice/>} />
+        <Route path="account" element={<Account />} />
+      </Route>
+    </Routes>
+  );
+}
