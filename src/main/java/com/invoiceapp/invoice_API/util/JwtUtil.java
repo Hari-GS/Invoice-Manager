@@ -23,24 +23,24 @@ public class JwtUtil {
     private long refreshTokenExpirationMs;
 
     public JwtUtil(@Value("${jwt.secret}") String secret) {
-        byte[] decodedKey = Base64.getEncoder().encode(secret.getBytes());
-        this.key = new SecretKeySpec(decodedKey, SignatureAlgorithm.HS256.getJcaName());
+        byte[] keyBytes = secret.getBytes();
+        this.key = new SecretKeySpec(keyBytes, SignatureAlgorithm.HS256.getJcaName());
     }
 
     // 🔐 Generate Access Token (Short-lived)
-    public String generateAccessToken(String username) {
-        return generateToken(username, accessTokenExpirationMs);
+    public String generateAccessToken(String email) {
+        return generateToken(email, accessTokenExpirationMs);
     }
 
     // 🔐 Generate Refresh Token (Long-lived)
-    public String generateRefreshToken(String username) {
-        return generateToken(username, refreshTokenExpirationMs);
+    public String generateRefreshToken(String email) {
+        return generateToken(email, refreshTokenExpirationMs);
     }
 
     // ⚙️ Token Generator
-    private String generateToken(String username, long expirationMillis) {
+    private String generateToken(String email, long expirationMillis) {
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(key)
