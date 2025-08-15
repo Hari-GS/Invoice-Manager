@@ -23,7 +23,7 @@ public class UserService {
 
     public User signup(UserDTO userDTO) {
         if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
-            throw new ResourceConflictException("Username already exists");
+            throw new ResourceConflictException("User email already exists");
         }
 
         User user = new User();
