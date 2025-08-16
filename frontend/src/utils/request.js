@@ -8,6 +8,21 @@ const apiClient = axios.create({
   },
 });
 
+// Request Interceptor
+apiClient.interceptors.request.use(
+  (config) => {
+    // Don't add token for login or signup requests
+    if (!config.url.includes("/login") && !config.url.includes("/signup")) {
+      const token = localStorage.getItem("refreshToken"); // or sessionStorage
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 export const request = {
   get: (url, config = {}) => apiClient.get(url, config),
   post: (url, data, config = {}) => apiClient.post(url, data, config),
