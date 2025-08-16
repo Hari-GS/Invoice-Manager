@@ -37,16 +37,26 @@ const Home = () => {
         </button>
       </div>
 
-      {/* Heading Row */}
-      <div className="rounded-lg shadow-sm flex items-center p-4 text-gray-600 font-bold text-sm">
-        <div className="w-16 ml-6">S.No</div>
-        <div className="w-36">Invoice ID</div>
-        <div className="w-64">Vendor Name</div>
-        <div className="w-40">Total Amount</div>
-        <div className="w-36">Due Date</div>
-        <div className="w-36">Days Left</div>
-        <div className="w-40 text-center">Actions</div>
-      </div>
+      {/* Content */}
+      {loading ? (
+        <p className="text-gray-500 text-center mt-10">Loading invoices...</p>
+      ) : invoices.length === 0 ? (
+        <p className="text-gray-500 text-center mt-10">
+          No invoices found. Click the + button to upload a new invoice.
+        </p>
+      ) : (
+        <>
+
+        {/* Heading Row */}
+        <div className="rounded-lg shadow-sm flex items-center p-4 text-gray-600 font-bold text-sm">
+          <div className="w-16 ml-6">S.No</div>
+          <div className="w-36">Invoice ID</div>
+          <div className="w-64">Vendor Name</div>
+          <div className="w-40">Total Amount</div>
+          <div className="w-36">Due Date</div>
+          <div className="w-36">Days Left</div>
+          <div className="w-40 text-center">Actions</div>
+        </div>
 
       {/* Card-style rows */}
       <div className="space-y-4">
@@ -74,6 +84,8 @@ const Home = () => {
           </div>
         ))}
       </div>
+      </>
+      )}
 
       {/* Floating Add Button */}
       <button

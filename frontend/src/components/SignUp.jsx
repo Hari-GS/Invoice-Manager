@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import request from "../utils/request";
+import { useNavigate } from "react-router-dom"; // ✅ import navigate
 
 export default function SignUp() {
   const [formData, setFormData] = useState({
@@ -8,7 +9,7 @@ export default function SignUp() {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const navigate = useNavigate(); // ✅ hook for redirect
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -17,7 +18,6 @@ export default function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -30,12 +30,12 @@ export default function SignUp() {
         password: formData.password,
       });
 
-      // Store tokens (demo)
+      // Store tokens
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
 
-      setSuccess("Signup successful! You are now logged in.");
-      setFormData({ email: "", password: "", confirmPassword: "" });
+      // ✅ Redirect to home after successful signup
+      navigate("/");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed");
     }
@@ -47,7 +47,6 @@ export default function SignUp() {
         <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
 
         {error && <p className="text-red-500 mb-4">{error}</p>}
-        {success && <p className="text-green-600 mb-4">{success}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
