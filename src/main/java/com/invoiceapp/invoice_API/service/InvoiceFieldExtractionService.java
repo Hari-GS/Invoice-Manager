@@ -1,7 +1,11 @@
 package com.invoiceapp.invoice_API.service;
 
+import com.invoiceapp.invoice_API.dto.InvoiceDTO;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.regex.*;
 
 import java.util.HashMap;
@@ -10,17 +14,23 @@ import java.util.Map;
 @Service
 public class InvoiceFieldExtractionService {
 
-    public Map<String, String> extractFields(String ocrText) {
+    public InvoiceDTO extractFields(String ocrText) {
 
-        Map<String, String> invoiceFields = new HashMap<>();
+        String invoiceNumber = extractInvoiceNumber(ocrText);
+        String vendorName = extractVendorName(ocrText);
+        String invoiceDate = extractInvoiceDate(ocrText);
+        String dueDate = extractDueDate(ocrText);
+        String totalAmount = extractTotalAmount(ocrText);
 
-        invoiceFields.put("invoiceNumber", extractInvoiceNumber(ocrText));
-        invoiceFields.put("vendorName", extractVendorName(ocrText));
-        invoiceFields.put("invoiceDate", extractInvoiceDate(ocrText));
-        invoiceFields.put("dueDate", extractDueDate(ocrText));
-        invoiceFields.put("totalAmount", extractTotalAmount(ocrText));
+        String daysLeft = calculateDaysLeft(dueDate);
 
-        return invoiceFields;
+        return InvoiceDTO.builder()
+                .invoiceId(invoiceNumber)
+                .vendorName(vendorName)
+                .totalAmount(totalAmount)
+                .dueDate(dueDate)
+                .daysLeft(daysLeft)
+                .build();
     }
 
     // Each field extractor method will be added below
@@ -69,4 +79,23 @@ public class InvoiceFieldExtractionService {
         return "Not Found";
     }
 
+    private String calculateDaysLeft(String dueDate) {
+        if ("Not Found".equals(dueDate)) {
+            return "Unknown";
+        }
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MMMM-yyyy"); // e.g. 10-July-2025
+            LocalDate due = LocalDate.parse(dueDate, formatter);
+            long daysBetween = ChronoUnit.DAYS.between(LocalDate.now(), due);
+            if(daysBetween==0){
+                return "Today";
+            }else if(daysBetween < 0){
+                return "Overdue";
+            }else{
+                return String.valueOf(daysBetween);
+            }
+        } catch (Exception e) {
+            return "Invalid Date Format";
+        }
+    }
 }
