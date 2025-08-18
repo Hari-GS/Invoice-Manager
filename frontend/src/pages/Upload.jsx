@@ -1,20 +1,43 @@
 import React, { useState } from "react";
-import { FiUploadCloud, FiArrowRight } from "react-icons/fi"; // icons from react-icons
+import { FiUploadCloud, FiArrowRight } from "react-icons/fi";
+import request from "../utils/request"; // ✅ use your axios helper
+import ExtractedInvoiceForm from "../components/ExtractedInvoiceForm";
 
 const InvoiceUpload = () => {
   const [file, setFile] = useState(null);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
+    setResult(null); // clear previous result if new file is selected
   };
 
-  const handleExtract = () => {
+  const handleExtract = async () => {
     if (!file) {
       alert("Please upload an invoice first!");
       return;
     }
-    // TODO: integrate with backend extraction API
-    console.log("Extracting details for:", file.name);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      setLoading(true);
+      setResult(null);
+
+      // ✅ call your backend endpoint
+      const res = await request.post("/invoices/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setResult(res.data); // backend should return extracted JSON
+    } catch (error) {
+      console.error("Error extracting invoice:", error);
+      setResult({ error: "Failed to extract invoice details!" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,6 +74,7 @@ const InvoiceUpload = () => {
                 id="file-upload"
                 type="file"
                 className="hidden"
+                accept="image/*"
                 onChange={handleFileChange}
               />
             </label>
@@ -60,17 +84,29 @@ const InvoiceUpload = () => {
           <div className="flex-shrink-0 mt-8">
             <button
               onClick={handleExtract}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-lg font-medium shadow-md flex items-center gap-2 transition"
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-3 py-1 rounded-lg font-medium shadow-md flex items-center gap-2 transition"
             >
-              Extract
-              <FiArrowRight className="h-5 w-5" />
+              {loading ? "Extracting..." : "Extract"}
+              {!loading && <FiArrowRight className="h-5 w-5" />}
             </button>
           </div>
 
-          {/* Extracted Details Box */}
-          <div className="flex-1 h-64 flex items-center justify-center border rounded-lg bg-gray-50 text-sm text-gray-400 mt-12">
-            Extracted details will appear here
-          </div>
+         {/* Extracted Details Section */}
+          {loading ? (
+            <div className="flex-1 h-64 flex items-center justify-center border rounded-lg bg-gray-50 text-sm text-gray-700 mt-12 p-4 overflow-auto">
+              <p className="text-gray-400">Processing invoice...</p>
+            </div>
+          ) : result ? (
+            <ExtractedInvoiceForm
+              extractedData={result}
+              onCancel={() => setResult(null)}
+            />
+          ) : (
+            <div className="flex-1 h-64 flex items-center justify-center border rounded-lg bg-gray-50 text-sm text-gray-700 mt-12 p-4 overflow-auto">
+              <p className="text-gray-400">Extracted details will appear here</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
