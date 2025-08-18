@@ -24,7 +24,13 @@ public class InvoiceFieldExtractionService {
 
         String daysLeft = calculateDaysLeft(dueDate);
 
-        return new InvoiceDTO(invoiceNumber, vendorName, totalAmount, dueDate, daysLeft);
+        return InvoiceDTO.builder()
+                .invoiceId(invoiceNumber)
+                .vendorName(vendorName)
+                .totalAmount(totalAmount)
+                .dueDate(dueDate)
+                .daysLeft(daysLeft)
+                .build();
     }
 
     // Each field extractor method will be added below
