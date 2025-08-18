@@ -1,5 +1,6 @@
 package com.invoiceapp.invoice_API.controller;
 
+import com.invoiceapp.invoice_API.dto.InvoiceDTO;
 import com.invoiceapp.invoice_API.model.Invoice;
 import com.invoiceapp.invoice_API.service.InvoiceFieldExtractionService;
 import com.invoiceapp.invoice_API.service.InvoiceService;
@@ -31,23 +32,35 @@ public class InvoiceController {
     InvoiceService invoiceService;
 
     @PostMapping("/upload")
-    public Map<String, String> uploadInvoice(@RequestParam("file") MultipartFile file,
-                                             Authentication authentication) throws IOException, TesseractException {
+    public InvoiceDTO uploadInvoice(@RequestParam("file") MultipartFile file,
+                                    Authentication authentication) throws IOException, TesseractException {
 
         String ocrText = ocrService.extractTextFromFile(file);
-        Map<String, String> extractedFields = invoiceFieldExtractionService.extractFields(ocrText);
 
-        return extractedFields;
+        // directly get DTO from service
+        return invoiceFieldExtractionService.extractFields(ocrText);
 
     }
 
     @PostMapping("/save")
-    public ResponseEntity<Invoice> saveInvoice(@AuthenticationPrincipal String email, @RequestBody Invoice invoice){
+    public ResponseEntity<InvoiceDTO> saveInvoice(@AuthenticationPrincipal String email, @RequestBody InvoiceDTO invoice){
         return ResponseEntity.ok(invoiceService.saveInvoice(email, invoice));
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<Invoice>> getInvoiceByUser(@AuthenticationPrincipal String email){
+    public ResponseEntity<List<InvoiceDTO>> getInvoiceByUser(@AuthenticationPrincipal String email){
         return ResponseEntity.ok(invoiceService.getInvoicesByUser(email));
+    }
+
+    @DeleteMapping("remove/{id}")
+    public ResponseEntity<String> removeInvoice(@PathVariable String id){
+        invoiceService.removeInvoice(id);
+        return ResponseEntity.ok("Invoice deleted successfully");
+    }
+
+    @PostMapping("/move/{id}")
+    public ResponseEntity<String> moveInvoice(@PathVariable String id){
+        invoiceService.moveInvoiceToPaid(id);
+        return ResponseEntity.ok("Invoice moved to paid invoices successfully");
     }
 }
